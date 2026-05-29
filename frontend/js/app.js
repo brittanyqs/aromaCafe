@@ -1,20 +1,28 @@
 let editingProductId = null;
 
-// 🔥 USUARIO LOGEADO
+// ==============================
+// USUARIO LOGEADO
+// ==============================
 const loggedUser = JSON.parse(localStorage.getItem("loggedUser") || "null");
 const role = loggedUser?.role;
 
-// 🔥 ELEMENTOS
+// ==============================
+// ELEMENTOS
+// ==============================
 const form = document.getElementById("productForm");
 const productsDiv = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
 
-// 🔥 PROTEGER CRUD (solo admin)
+// ==============================
+// PROTEGER CRUD (solo admin)
+// ==============================
 if (form && role !== "admin") {
     form.style.display = "none";
 }
 
-// 🔥 PROTEGER ACCESO A PRODUCTOS
+// ==============================
+// PROTEGER ACCESO
+// ==============================
 if (!loggedUser) {
     if (productsDiv) {
         productsDiv.innerHTML = `
@@ -27,6 +35,11 @@ if (!loggedUser) {
     getProducts();
 }
 
+// ==============================
+// URL BACKEND
+// ==============================
+const API_URL = "https://aromacafe-backend.onrender.com/api/products";
+
 
 // ==============================
 // OBTENER PRODUCTOS
@@ -35,7 +48,7 @@ async function getProducts() {
 
     if (!productsDiv) return;
 
-    const response = await fetch("http://localhost:3000/api/products");
+    const response = await fetch(API_URL);
     const products = await response.json();
 
     productsDiv.innerHTML = "";
@@ -89,7 +102,7 @@ async function getProducts() {
 // ==============================
 async function deleteProduct(id){
 
-    await fetch(`http://localhost:3000/api/products/${id}`, {
+    await fetch(`${API_URL}/${id}`, {
         method: "DELETE"
     });
 
@@ -102,7 +115,7 @@ async function deleteProduct(id){
 // ==============================
 async function editProduct(id){
 
-    const response = await fetch("http://localhost:3000/api/products");
+    const response = await fetch(API_URL);
     const products = await response.json();
 
     const product = products.find(p => p._id === id);
@@ -120,7 +133,7 @@ async function editProduct(id){
 
 
 // ==============================
-// FORMULARIO
+// FORMULARIO (CREATE / UPDATE)
 // ==============================
 if (form) {
 
@@ -136,9 +149,10 @@ if (form) {
             stock: Number(document.getElementById("stock").value)
         };
 
+        // UPDATE
         if (editingProductId) {
 
-            await fetch(`http://localhost:3000/api/products/${editingProductId}`, {
+            await fetch(`${API_URL}/${editingProductId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -149,9 +163,11 @@ if (form) {
             editingProductId = null;
             form.querySelector("button").textContent = "Agregar producto";
 
-        } else {
+        } 
+        // CREATE
+        else {
 
-            await fetch("http://localhost:3000/api/products", {
+            await fetch(API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
